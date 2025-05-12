@@ -8,7 +8,7 @@ export const signup = async (req, res) => {
     const { fullName, email, password, bio } = req.body;
     try {
         if (!fullName || !email || !password || !bio) {
-            return res.status(400).json({ success: false, mmessage: "Please fill all the fields" });
+            return res.status(400).json({ success: false, message: "Please fill all the fields" });
         }
         const user = await User.findOne({ email });
         if (user) {
@@ -29,7 +29,6 @@ export const signup = async (req, res) => {
     } catch (error) {
         console.error("Error in signup:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
-
     }
 }
 
@@ -37,12 +36,15 @@ export const login = async (req, res) => {
     const { email, password } = req.body
     try {
         const userData = await User.findOne({ email });
-        const isPasswordCorrect = bcrypt.compare(password, userData.password);
+        if (!userData) {
+            return res.status(400).json({ success: false, message: "User not found" });
+        }
+        const isPasswordCorrect = await bcrypt.compare(password, userData.password);
         if (!isPasswordCorrect) {
-            return res.status(400).json({ success: false, message: "Invalid Crdential" });
+            return res.status(400).json({ success: false, message: "Invalid Credentials" });
         }
         const token = generateToken(userData._id);
-        res.status(201).json({ success: true, message: "Login successfully", userData, token });
+        res.status(200).json({ success: true, message: "Login successful", userData, token });
 
     } catch (error) {
         console.error("Error in login:", error);
