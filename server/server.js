@@ -44,17 +44,15 @@ app.use("/api/status", (req, res) => res.send("Server is live!"));
 app.use('/api/auth', userRouter)
 app.use('/api/messages', messageRouter)
 
-const start = async () => {
-    try {
-        connectDB(process.env.MONGODB_URI);
-        server.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    } catch (error) {
-        console.error("Error connecting to the database", error);
-    }
-};
-start();
+if(process.env.NODE_ENV !== "production"){ 
+    connectDB(process.env.MONGODB_URI);
+    server.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+   
+
+export default server;
 
 
 
