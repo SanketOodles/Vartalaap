@@ -54,7 +54,10 @@ export const AuthProvider = ({ children }) => {
         setOnlineUsers([])
         axios.defaults.headers.common["token"] = null;
         toast.success("Logged Out SuccessFully")
-        socket.disconnect();
+         if (socket) {
+                socket.disconnect();
+                setSocket(null);
+            }
     }
 
     //update profile
@@ -93,8 +96,21 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         if (token) {
             axios.defaults.headers.common["token"] = token
+            checkAuth();
         }
-        checkAuth();
+         // Cleanup function
+         return () => {
+            if (socket) {
+                socket.off("connect");
+                socket.off("disconnect");
+                socket.off("connect_error");
+                socket.off("getOnlineUsers");
+                
+                if (socket.connected) {
+                    socket.disconnect();
+                }
+            }
+        };
     }, [])
     const value = {
         axios,
